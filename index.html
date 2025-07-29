@@ -8,277 +8,328 @@
 <body>
     <div id="CalculatorContainer"></div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const container = document.getElementById('CalculatorContainer');
-            
-            // Set the HTML content within the container
-            container.innerHTML = `
-                <div class="heat-index-calculator">
-                    <h2>Heat Index Calculator</h2>
-                    <div class="calculator-inputs">
-                        <div class="calculator-input">
-                            <label for="temperature">Temperature (°F):</label>
-                            <input type="number" id="temperature" placeholder="80-100°F" min="80" max="100">
-                            <div id="temp-error" class="error-message"></div>
-                        </div>
-                        <div class="calculator-input">
-                            <label for="humidity">Relative Humidity (%):</label>
-                            <input type="number" id="humidity" placeholder="40-80%" min="40" max="80">
-                            <div id="humidity-error" class="error-message"></div>
-                        </div>
-                    </div>
-                    <button id="calculate-btn">Calculate Heat Index</button>
-                    <div id="result" class="calculator-result">
-                        <p>Heat Index: <span id="heat-index">--</span> °F (<span id="heat-index-c">--</span> °C)</p>
-                        <p>Risk Level: <span id="risk-level">--</span></p>
-                        <p id="calculation-method"></p>
-                    </div>
-                </div>
-            `;
+<script>
+// Create calculator HTML structure
+document.getElementById('CalculatorContainer').innerHTML = `
+<div id="HeatIndexCalculator">
+  <style>
+    #HeatIndexCalculator {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    #HeatIndexCalculator .calculator {
+      background-color: white;
+      border-radius: 5px;
+      padding: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+    }
+    
+    #HeatIndexCalculator h1.calculator-title {
+      color: #ad2a24;
+      text-align: center;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    
+    #HeatIndexCalculator .calculator-inputs {
+      margin-bottom: 15px;
+    }
+    
+    #HeatIndexCalculator .calculator-input {
+      margin-bottom: 15px;
+    }
+    
+    #HeatIndexCalculator label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    #HeatIndexCalculator input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+    
+    #HeatIndexCalculator .error-message {
+      color: #ad2a24;
+      font-size: 0.8em;
+      margin-top: 5px;
+      height: 15px;
+    }
+    
+    #HeatIndexCalculator .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    #HeatIndexCalculator button {
+      flex: 1;
+      padding: 12px;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    
+    #HeatIndexCalculator #hi-calculate-btn {
+      background-color: #ad2a24;
+    }
+    
+    #HeatIndexCalculator #hi-calculate-btn:hover {
+      background-color: #8c221d;
+    }
+    
+    #HeatIndexCalculator #hi-reset-btn {
+      background-color: #666;
+    }
+    
+    #HeatIndexCalculator #hi-reset-btn:hover {
+      background-color: #555;
+    }
+    
+    #HeatIndexCalculator .calculator-result {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f5f5f5;
+      border-radius: 4px;
+      text-align: center;
+    }
+    
+    #HeatIndexCalculator .heat-index-value {
+      font-weight: bold;
+      font-size: 1.1em;
+    }
+    
+    #HeatIndexCalculator #hi-risk-level {
+      font-weight: bold;
+    }
+    
+    #HeatIndexCalculator .caution {
+      color: #ff9800;
+    }
+    
+    #HeatIndexCalculator .extreme-caution {
+      color: #ff5722;
+    }
+    
+    #HeatIndexCalculator .danger {
+      color: #ad2a24;
+      font-weight: bold;
+    }
+    
+    #HeatIndexCalculator .extreme-danger {
+      color: #8c221d;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    
+    #HeatIndexCalculator .calculator-footer {
+      text-align: center;
+      font-size: 14px;
+      color: #777;
+      margin-top: 30px;
+    }
+    
+    @media (max-width: 480px) {
+      #HeatIndexCalculator {
+        padding: 10px;
+      }
+      
+      #HeatIndexCalculator .calculator {
+        padding: 15px;
+      }
+      
+      #HeatIndexCalculator input {
+        padding: 14px;
+        font-size: 18px;
+      }
+      
+      #HeatIndexCalculator button {
+        padding: 14px;
+        font-size: 18px;
+      }
+      
+      #HeatIndexCalculator .button-group {
+        flex-direction: column;
+      }
+    }
+  </style>
 
-            // Create a style element with scoped CSS
-            const style = document.createElement('style');
-            style.innerHTML = `
-                #CalculatorContainer .heat-index-calculator {
-                    font-family: Arial, sans-serif;
-                    max-width: 100%;
-                    width: 400px;
-                    margin: 20px auto;
-                    padding: 20px;
-                    border: 1px solid #ddd;
-                    border-radius: 5px;
-                    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-                    background-color: #f9f9f9;
-                    box-sizing: border-box;
-                }
+  <div class="calculator">
+    <h1 class="calculator-title">Heat Index Calculator</h1>
+    
+    <div class="calculator-inputs">
+      <div class="calculator-input">
+        <label for="hi-temperature">Temperature (°F):</label>
+        <input type="number" id="hi-temperature" placeholder="70-120°F" min="70" max="120">
+        <div id="hi-temp-error" class="error-message"></div>
+      </div>
+      <div class="calculator-input">
+        <label for="hi-humidity">Relative Humidity (%):</label>
+        <input type="number" id="hi-humidity" placeholder="0-100%" min="0" max="100">
+        <div id="hi-humidity-error" class="error-message"></div>
+      </div>
+    </div>
+    
+    <div class="button-group">
+      <button id="hi-calculate-btn">Calculate</button>
+      <button id="hi-reset-btn">Reset</button>
+    </div>
+    
+    <div id="hi-result" class="calculator-result" style="display: none;">
+      <p>Heat Index: <span id="hi-heat-index" class="heat-index-value">--</span> °F (<span id="hi-heat-index-c" class="heat-index-value">--</span> °C)</p>
+      <p>Risk Level: <span id="hi-risk-level">--</span></p>
+    </div>
+    
+    <div class="calculator-footer">
+      <p>Based on NOAA/NWS Heat Index Equation</p>
+    </div>
+  </div>
+</div>
+`;
 
-                #CalculatorContainer .heat-index-calculator h2 {
-                    color: #333;
-                    text-align: center;
-                    margin-bottom: 20px;
-                    font-size: 1.5rem;
-                }
+// Initialize calculator functionality
+(function() {
+  // Calculate Heat Index
+  function calculateHeatIndex() {
+    // Clear previous errors
+    document.getElementById('hi-temp-error').textContent = '';
+    document.getElementById('hi-humidity-error').textContent = '';
+    
+    // Get input values
+    const tempInput = document.getElementById('hi-temperature').value.trim();
+    const humidityInput = document.getElementById('hi-humidity').value.trim();
+    
+    // Validate inputs
+    let isValid = true;
+    
+    // Temperature validation
+    if (tempInput === '') {
+      document.getElementById('hi-temp-error').textContent = 'Please enter temperature';
+      isValid = false;
+    } else if (isNaN(tempInput)) {
+      document.getElementById('hi-temp-error').textContent = 'Temperature must be a number';
+      isValid = false;
+    } else {
+      const tempF = parseFloat(tempInput);
+      if (tempF < 70 || tempF > 120) {
+        document.getElementById('hi-temp-error').textContent = 'Temperature must be between 70°F and 120°F';
+        isValid = false;
+      }
+    }
+    
+    // Humidity validation
+    if (humidityInput === '') {
+      document.getElementById('hi-humidity-error').textContent = 'Please enter humidity';
+      isValid = false;
+    } else if (isNaN(humidityInput)) {
+      document.getElementById('hi-humidity-error').textContent = 'Humidity must be a number';
+      isValid = false;
+    } else {
+      const humidity = parseFloat(humidityInput);
+      if (humidity < 0 || humidity > 100) {
+        document.getElementById('hi-humidity-error').textContent = 'Humidity must be between 0% and 100%';
+        isValid = false;
+      }
+    }
+    
+    if (!isValid) {
+      // Hide results if inputs are invalid
+      document.getElementById('hi-result').style.display = 'none';
+      return;
+    }
+    
+    const tempF = parseFloat(tempInput);
+    const humidity = parseFloat(humidityInput);
+    
+    // Calculate Heat Index
+    let heatIndex;
+    
+    if (tempF < 80 || humidity < 40) {
+      // Steadman approximation
+      heatIndex = 0.5 * (tempF + 61.0 + ((tempF - 68.0) * 1.2) + (humidity * 0.094));
+    } else {
+      // Rothfusz regression
+      heatIndex = -42.379 + 2.04901523 * tempF + 10.14333127 * humidity 
+                 - 0.22475541 * tempF * humidity - 6.83783e-3 * tempF * tempF 
+                 - 5.481717e-2 * humidity * humidity 
+                 + 1.22874e-3 * tempF * tempF * humidity 
+                 + 8.5282e-4 * tempF * humidity * humidity 
+                 - 1.99e-6 * tempF * tempF * humidity * humidity;
+      
+      // Adjustments
+      if (humidity < 13 && tempF >= 80 && tempF <= 112) {
+        heatIndex -= ((13 - humidity) / 4) * Math.sqrt((17 - Math.abs(tempF - 95)) / 17);
+      } else if (humidity > 85 && tempF >= 80 && tempF <= 87) {
+        heatIndex += ((humidity - 85) / 10) * ((87 - tempF) / 5);
+      }
+    }
+    
+    // Display results (to 1 decimal place)
+    document.getElementById('hi-heat-index').textContent = heatIndex.toFixed(1);
+    document.getElementById('hi-heat-index-c').textContent = ((heatIndex - 32) * 5 / 9).toFixed(1);
+    
+    // Determine risk level
+    const riskLevel = document.getElementById('hi-risk-level');
+    riskLevel.className = '';
+    
+    if (heatIndex < 80) {
+      riskLevel.textContent = 'No risk';
+    } else if (heatIndex >= 80 && heatIndex <= 90) {
+      riskLevel.textContent = 'Caution';
+      riskLevel.classList.add('caution');
+    } else if (heatIndex > 90 && heatIndex <= 103) {
+      riskLevel.textContent = 'Extreme Caution';
+      riskLevel.classList.add('extreme-caution');
+    } else if (heatIndex > 103 && heatIndex <= 124) {
+      riskLevel.textContent = 'Danger';
+      riskLevel.classList.add('danger');
+    } else if (heatIndex > 124) {
+      riskLevel.textContent = 'EXTREME DANGER';
+      riskLevel.classList.add('extreme-danger');
+    }
+    
+    // Show results
+    document.getElementById('hi-result').style.display = 'block';
+  }
+  
+  // Reset calculator
+  function resetCalculator() {
+    document.getElementById('hi-temperature').value = '';
+    document.getElementById('hi-humidity').value = '';
+    document.getElementById('hi-temp-error').textContent = '';
+    document.getElementById('hi-humidity-error').textContent = '';
+    document.getElementById('hi-heat-index').textContent = '--';
+    document.getElementById('hi-heat-index-c').textContent = '--';
+    document.getElementById('hi-risk-level').textContent = '--';
+    document.getElementById('hi-risk-level').className = '';
+    document.getElementById('hi-result').style.display = 'none';
+  }
 
-                #CalculatorContainer .calculator-inputs {
-                    margin-bottom: 15px;
-                }
-
-                #CalculatorContainer .calculator-input {
-                    margin-bottom: 15px;
-                }
-
-                #CalculatorContainer .calculator-input label {
-                    display: block;
-                    margin-bottom: 5px;
-                    font-weight: bold;
-                }
-
-                #CalculatorContainer .calculator-input input {
-                    width: 100%;
-                    padding: 12px;
-                    border: 1px solid #ddd;
-                    border-radius: 4px;
-                    box-sizing: border-box;
-                    font-size: 16px;
-                }
-
-                #CalculatorContainer .error-message {
-                    color: #f44336;
-                    font-size: 0.8em;
-                    margin-top: 5px;
-                    height: 15px;
-                }
-
-                #CalculatorContainer button {
-                    width: 100%;
-                    padding: 12px;
-                    background-color: #ad2a24;
-                    color: white;
-                    border: none;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-size: 16px;
-                    margin-top: 10px;
-                }
-
-                #CalculatorContainer button:hover {
-                    background-color: #8c221d;
-                }
-
-                #CalculatorContainer .calculator-result {
-                    margin-top: 20px;
-                    padding: 15px;
-                    background-color: #e9f7ef;
-                    border-radius: 4px;
-                    text-align: center;
-                }
-
-                #CalculatorContainer #risk-level {
-                    font-weight: bold;
-                }
-
-                #CalculatorContainer .caution {
-                    color: #ff9800;
-                }
-
-                #CalculatorContainer .extreme-caution {
-                    color: #ff5722;
-                }
-
-                #CalculatorContainer .danger {
-                    color: #f44336;
-                    font-weight: bold;
-                }
-
-                #CalculatorContainer .extreme-danger {
-                    color: #d32f2f;
-                    font-weight: bold;
-                    text-transform: uppercase;
-                }
-
-                #CalculatorContainer #calculation-method {
-                    font-style: italic;
-                    font-size: 0.9em;
-                    margin-top: 10px;
-                    color: #666;
-                }
-
-                /* Mobile responsiveness */
-                @media (max-width: 480px) {
-                    #CalculatorContainer .heat-index-calculator {
-                        width: 90%;
-                        padding: 15px;
-                    }
-                    
-                    #CalculatorContainer .calculator-input input {
-                        padding: 10px;
-                    }
-                    
-                    #CalculatorContainer button {
-                        padding: 10px;
-                    }
-                    
-                    #CalculatorContainer .heat-index-calculator h2 {
-                        font-size: 1.3rem;
-                    }
-                }
-            `;
-            document.head.appendChild(style);
-
-            // Initialize event listeners
-            document.getElementById('calculate-btn').addEventListener('click', calculateHeatIndex);
-            
-            // Calculate on Enter key press
-            document.getElementById('temperature').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') calculateHeatIndex();
-            });
-            document.getElementById('humidity').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') calculateHeatIndex();
-            });
-
-            function calculateHeatIndex() {
-                // Clear previous errors and results
-                document.getElementById('temp-error').textContent = '';
-                document.getElementById('humidity-error').textContent = '';
-                document.getElementById('calculation-method').textContent = '';
-                
-                // Get input values
-                const tempInput = document.getElementById('temperature').value.trim();
-                const humidityInput = document.getElementById('humidity').value.trim();
-                
-                // Validate inputs
-                let isValid = true;
-                
-                // Temperature validation
-                if (tempInput === '') {
-                    document.getElementById('temp-error').textContent = 'Please enter temperature between 80°F and 100°F';
-                    isValid = false;
-                } else if (isNaN(tempInput)) {
-                    document.getElementById('temp-error').textContent = 'Temperature must be a number between 80 and 100';
-                    isValid = false;
-                } else {
-                    const tempF = parseFloat(tempInput);
-                    if (tempF < 80 || tempF > 100) {
-                        document.getElementById('temp-error').textContent = 'Temperature must be between 80°F and 100°F';
-                        isValid = false;
-                    }
-                }
-                
-                // Humidity validation
-                if (humidityInput === '') {
-                    document.getElementById('humidity-error').textContent = 'Please enter humidity between 40% and 80%';
-                    isValid = false;
-                } else if (isNaN(humidityInput)) {
-                    document.getElementById('humidity-error').textContent = 'Humidity must be a number between 40 and 80';
-                    isValid = false;
-                } else {
-                    const humidity = parseFloat(humidityInput);
-                    if (humidity < 40 || humidity > 80) {
-                        document.getElementById('humidity-error').textContent = 'Humidity must be between 40% and 80%';
-                        isValid = false;
-                    }
-                }
-                
-                if (!isValid) {
-                    // Clear results if inputs are invalid
-                    document.getElementById('heat-index').textContent = '--';
-                    document.getElementById('heat-index-c').textContent = '--';
-                    document.getElementById('risk-level').textContent = '--';
-                    document.getElementById('risk-level').className = '';
-                    return;
-                }
-                
-                const tempF = parseFloat(tempInput);
-                const humidity = parseFloat(humidityInput);
-                
-                // Calculate Heat Index using the Rothfusz regression
-                let heatIndex = -42.379 + 2.04901523 * tempF + 10.14333127 * humidity 
-                               - 0.22475541 * tempF * humidity - 6.83783e-3 * tempF * tempF 
-                               - 5.481717e-2 * humidity * humidity 
-                               + 1.22874e-3 * tempF * tempF * humidity 
-                               + 8.5282e-4 * tempF * humidity * humidity 
-                               - 1.99e-6 * tempF * tempF * humidity * humidity;
-                
-                // Adjustments for very high or low humidity
-                if (humidity < 13 && tempF >= 80 && tempF <= 112) {
-                    heatIndex -= ((13 - humidity) / 4) * Math.sqrt((17 - Math.abs(tempF - 95)) / 17);
-                } else if (humidity > 85 && tempF >= 80 && tempF <= 87) {
-                    heatIndex += ((humidity - 85) / 10) * ((87 - tempF) / 5);
-                }
-                
-                // Round to nearest integer
-                heatIndex = Math.round(heatIndex);
-                
-                // Convert to Celsius
-                const heatIndexC = Math.round((heatIndex - 32) * 5 / 9);
-                
-                // Display results
-                document.getElementById('heat-index').textContent = heatIndex;
-                document.getElementById('heat-index-c').textContent = heatIndexC;
-                document.getElementById('calculation-method').textContent = 'Calculated using Rothfusz regression formula';
-                
-                // Determine risk level
-                const riskLevel = document.getElementById('risk-level');
-                riskLevel.className = '';
-                
-                if (heatIndex < 80) {
-                    riskLevel.textContent = 'No risk';
-                } else if (heatIndex >= 80 && heatIndex <= 90) {
-                    riskLevel.textContent = 'Caution';
-                    riskLevel.classList.add('caution');
-                } else if (heatIndex > 90 && heatIndex <= 103) {
-                    riskLevel.textContent = 'Extreme Caution';
-                    riskLevel.classList.add('extreme-caution');
-                } else if (heatIndex > 103 && heatIndex <= 124) {
-                    riskLevel.textContent = 'Danger';
-                    riskLevel.classList.add('danger');
-                } else if (heatIndex > 124) {
-                    riskLevel.textContent = 'EXTREME DANGER';
-                    riskLevel.classList.add('extreme-danger');
-                }
-            }
-        });
-    </script>
+  // Event listeners
+  document.getElementById('hi-calculate-btn').addEventListener('click', calculateHeatIndex);
+  document.getElementById('hi-reset-btn').addEventListener('click', resetCalculator);
+  
+  document.getElementById('hi-temperature').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') calculateHeatIndex();
+  });
+  
+  document.getElementById('hi-humidity').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') calculateHeatIndex();
+  });
+})();
+</script>
 </body>
 </html>
